@@ -46,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     InetAddress address;
     TextView tv1;
     Peer peer;
+    Thread thread;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,20 +54,20 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         tv1= (TextView) findViewById(R.id.tv);
         tv1.setMovementMethod(new ScrollingMovementMethod());
-        WifiManager wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        WifiManager wifi = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         if (wifi != null) {
             WifiManager.MulticastLock lock = wifi.createMulticastLock("WifiDevices");
             lock.acquire();
           //  Toast.makeText(MainActivity.this,"lock acquired",Toast.LENGTH_SHORT).show();
         }
         else {
-        //    Toast.makeText(MainActivity.this, "wifi is null", Toast.LENGTH_SHORT).show();
+        //    Toast.makeText(MainActivity.this, "Please enable Wi-Fi", Toast.LENGTH_SHORT).show();
         }
 
         try{
             address = InetAddress.getByName(MULTI_IP);
             sock = new MulticastSocket(PORT);
-            Toast.makeText(MainActivity.this,"r",Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this,"Welcome",Toast.LENGTH_SHORT).show();
         }
         catch(IOException e){
             e.printStackTrace();
@@ -84,67 +85,94 @@ public class MainActivity extends AppCompatActivity {
         peer.setIp(getIP());
         mePeer = peer.toJson();
 
-        Thread thread = new Thread(){
+        thread = new Thread(){
             public void run(){
 
-                    while (true) {
-                        if(!b) {
-                            try {
+                while (true) {
+                    if(!b) {
+                        try {
 
 
-                                inbuf = new byte[BUFFER_SIZE];
-                                DatagramPacket msgPacket = new DatagramPacket(inbuf, inbuf.length);
-                                sock.receive(msgPacket);
-                                final String msg = new String(inbuf, 0, inbuf.length);
+                            inbuf = new byte[BUFFER_SIZE];
+                            DatagramPacket msgPacket = new DatagramPacket(inbuf, inbuf.length);
+                            if(Thread.interrupted())    //socket not blocked on receive
+                                return;
+                            sock.receive(msgPacket);
+                            if(Thread.interrupted())   //in case socket was blocked on receive
+                                return;
+                            final String msg = new String(inbuf, 0, msgPacket.getLength());
 
-                                if(msg.charAt(0)=='e'){
-                                    peers.clear();
-                                    peers.add(msg.substring(1));
+                            if(msg.charAt(0)=='e'){
+                                peers.clear();
+                                peers.add(msg.substring(1));
 
-                                    if(!(msg.substring(1).trim().equals(mePeer))) {
-                                        send("p" + mePeer);
+                                final Peer print_peer = new Peer().fromJson(msg.substring(1));
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+
+                                        tv1.setText(tv1.getText()+"\n\nCANDIDACY RECEIVED:\nIP Address: " + print_peer.getIp()
+                                                +"\nBattery: "+ print_peer.getBattery().toString());
                                     }
-                                    new Thread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            try {
-                                                Thread.sleep(1000);
-                                                    runOnUiThread(new Runnable() {
-                                                        @Override
-                                                        public void run() {
-                                                            float max=0;
-                                                            Peer mx=new Peer();
-                                                            for(String s:peers){
-                                                                Peer temp;
-                                                                temp=new Peer();
-                                                                temp=temp.fromJson(s.trim());
-                                                                if(Float.parseFloat(temp.getBattery().toString())>max){
-                                                                    max=Float.parseFloat(temp.getBattery().toString());
-                                                                    mx=temp;
-                                                                }
-                                                            }
-                                                            tv1.setText("HEAD SELECTED from "+ Integer.toString(peers.size()) +
-                                                                    " PEERS :\n" +"\nIP Address: " + mx.getIp().toString()
-                                                            +"\nBattery: "+ mx.getBattery().toString());
-                                                        }
-                                                    });
+                                });
 
-
-                                            } catch (InterruptedException e) {
-                                                e.printStackTrace();
+                                if(!(msg.substring(1).equals(mePeer))) {
+                                    send("p" + mePeer);
+                                }
+                                new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            Thread.sleep(1000);
+                                            float max=0;
+                                            Peer mx=new Peer();
+                                            for(String s:peers){
+                                                Peer temp;
+                                                temp=new Peer();
+                                                temp=temp.fromJson(s);
+                                                if(Float.parseFloat(temp.getBattery().toString())>max){
+                                                    max=Float.parseFloat(temp.getBattery().toString());
+                                                    mx=temp;
+                                                }
                                             }
+                                            final Peer mx_v = mx;
+                                            runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
 
+                                                    tv1.setText(tv1.getText()+"\n\nHEAD SELECTED from "+ Integer.toString(peers.size()) +
+                                                            " PEERS:\n\n" +"IP Address: " + mx_v.getIp()
+                                                    +"\nBattery: "+ mx_v.getBattery().toString());
+                                                }
+                                            });
+
+
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
                                         }
-                                    }).start();
-                                }
-                                else if(msg.charAt(0)=='p'){
-                                    peers.add(msg.substring(1));
-                                }
-                            } catch (IOException e) {
+
+                                    }
+                                }).start();
+                            }
+                            else if(msg.charAt(0)=='p'){
+                                peers.add(msg.substring(1));
+
+                                final Peer print_peer = new Peer().fromJson(msg.substring(1));
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+
+                                        tv1.setText(tv1.getText()+"\n\nCANDIDACY RECEIVED:\nIP Address: " + print_peer.getIp()
+                                                +"\nBattery: "+ print_peer.getBattery().toString());
+                                    }
+                                });
 
                             }
+                        } catch (IOException e) {
+
                         }
                     }
+                }
 
             }
         };
@@ -154,6 +182,31 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onBackPressed() {
+        thread.interrupt();
+        /*try {
+            outBuf = "exit".getBytes();
+            final DatagramPacket outPacket = new DatagramPacket(outBuf, outBuf.length, address, PORT);
+            new Thread (new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        DatagramSocket socketClient = new DatagramSocket();
+                        socketClient.send(outPacket);
+                        socketClient.close();
+                    } catch(IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+            thread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }*/
+        this.finishAffinity();
+        System.exit(0);
+    }
 
     public void f2(View v){
         try{
@@ -192,6 +245,7 @@ public class MainActivity extends AppCompatActivity {
 
             DatagramPacket outPacket = new DatagramPacket(outBuf, outBuf.length, address, PORT);
             socketClient.send(outPacket);
+            socketClient.close();
         }
         catch (IOException e){
             e.printStackTrace();
@@ -202,7 +256,7 @@ public class MainActivity extends AppCompatActivity {
     public String getIP() {
 
 
-        WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
+        WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
         return Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
     }
 
