@@ -1,15 +1,19 @@
 package com.example.jit.multicast_demo;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.format.Formatter;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
 
@@ -44,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
     final static String TAG="D";
     String mePeer;
     InetAddress address;
-    TextView tv1;
+    TextView tv1,tv2;
     Peer peer;
     Thread thread;
 
@@ -55,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
         tv1= (TextView) findViewById(R.id.tv);
         tv1.setMovementMethod(new ScrollingMovementMethod());
         WifiManager wifi = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        tv2=(TextView)findViewById(R.id.are_u_head);
         if (wifi != null) {
             WifiManager.MulticastLock lock = wifi.createMulticastLock("WifiDevices");
             lock.acquire();
@@ -92,7 +97,6 @@ public class MainActivity extends AppCompatActivity {
                     if(!b) {
                         try {
 
-
                             inbuf = new byte[BUFFER_SIZE];
                             DatagramPacket msgPacket = new DatagramPacket(inbuf, inbuf.length);
                             if(Thread.interrupted())    //socket not blocked on receive
@@ -119,6 +123,7 @@ public class MainActivity extends AppCompatActivity {
                                 if(!(msg.substring(1).equals(mePeer))) {
                                     send("p" + mePeer);
                                 }
+
                                 new Thread(new Runnable() {
                                     @Override
                                     public void run() {
@@ -143,6 +148,14 @@ public class MainActivity extends AppCompatActivity {
                                                     tv1.setText(tv1.getText()+"\n\nHEAD SELECTED from "+ Integer.toString(peers.size()) +
                                                             " PEERS:\n\n" +"IP Address: " + mx_v.getIp()
                                                     +"\nBattery: "+ mx_v.getBattery().toString());
+                                                    String yes_no;
+                                                    if(mx_v.getIp().equals(peer.getIp())){
+                                                        yes_no = "YES";
+                                                    }
+                                                    else {
+                                                        yes_no = "NO";
+                                                    }
+                                                    tv2.setText("Are you head ? : "+yes_no);
                                                 }
                                             });
 
@@ -275,5 +288,23 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        int id = item.getItemId();
+        if (id == R.id.my_files) {
+            Intent i = new Intent(MainActivity.this,MyFiles.class);
+            startActivity(i);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+
 
 }
