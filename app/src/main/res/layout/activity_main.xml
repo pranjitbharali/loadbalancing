@@ -28,11 +28,21 @@
         android:id="@+id/are_u_head"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/tv"
-        android:layout_alignEnd="@+id/tv"
-        android:layout_alignRight="@+id/tv"
-        android:layout_marginBottom="14dp"
-        android:layout_marginEnd="34dp"
-        android:layout_marginRight="34dp" />
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/Subscribe"
+        android:layout_marginTop="28dp" />
+
+    <Button
+        android:id="@+id/displayb"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginEnd="20dp"
+        android:layout_marginRight="20dp"
+        android:onClick="display1"
+        android:text="Request" />
 
 </RelativeLayout>
