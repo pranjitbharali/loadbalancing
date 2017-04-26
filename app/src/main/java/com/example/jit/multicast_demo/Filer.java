@@ -127,8 +127,7 @@ public class Filer {
                                         e1.printStackTrace();
                                     }
                                     try {
-                                        File f = new File(newpath);
-                                        f.delete();
+                                        file.delete();
                                     } catch(Exception e) {
                                         System.out.println("Unable to delete COPY file");
                                     }
