@@ -117,12 +117,6 @@ public class Filer {
                                     fis.close();
                                     //out.close();
                                     //client.close();
-                                    try {
-                                        File f = new File(newpath);
-                                        f.delete();
-                                    } catch(Exception e) {
-                                        System.out.println("Unable to delete COPY file");
-                                    }
                                 } catch(IOException e) {
                                     e.printStackTrace();
                                 } finally {
@@ -131,6 +125,12 @@ public class Filer {
                                         client.close();
                                     }catch(Exception e1) {
                                         e1.printStackTrace();
+                                    }
+                                    try {
+                                        File f = new File(newpath);
+                                        f.delete();
+                                    } catch(Exception e) {
+                                        System.out.println("Unable to delete COPY file");
                                     }
                                 }
                             }
