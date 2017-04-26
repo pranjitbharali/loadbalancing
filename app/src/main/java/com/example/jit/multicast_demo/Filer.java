@@ -52,18 +52,22 @@ public class Filer {
                         newpath= mat.group(1)+"COPY."+mat.group(2);
                     }
 
-                    String cmd = "-i "+f.getAbsolutePath()+" -ss "+off+" -codec copy -t "+len+" "+newpath ;
+                    String cmd = "-y -i "+f.getAbsolutePath()+" -ss "+off+" -codec copy -t "+len+" "+newpath ;
                     String[] command = cmd.split(" ");
                     pr("in filer");
                     try {
                         File toDelete = new File(newpath);
-                        toDelete.delete();
-                        System.out.println("COPY file REMOVED!");
+                        if(toDelete.delete()==true)
+                            System.out.println("COPY file REMOVED!");
+                        else
+                            System.out.println("COPY file doesn't exist already");
                     }catch(Exception e) {
                         System.out.println("COPY file doesn't exist already");
                     }
-                    ffmpegSplit(command, out, newpath,client);
 
+
+                    System.out.println("FFMPEG command: "+cmd);
+                    ffmpegSplit(command, out, newpath,client);
                    /* init array with file length
                     bytesArray = new byte[len.intValue()];
                     FileInputStream fis = new FileInputStream(file);
@@ -129,7 +133,7 @@ public class Filer {
                                     try {
                                         file.delete();
                                     } catch(Exception e) {
-                                        System.out.println("Unable to delete COPY file");
+                                        System.out.println("Unable to delete COPY file after sending");
                                     }
                                 }
                             }

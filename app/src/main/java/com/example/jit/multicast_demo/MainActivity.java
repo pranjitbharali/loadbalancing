@@ -616,6 +616,7 @@ public class MainActivity extends AppCompatActivity {
                     Intent myIntent = new Intent(MainActivity.this, Display.class);
                     myIntent.putExtra("arr",in1);
                     myIntent.putExtra("ip",headip);
+                    myIntent.putExtra("hm", fm.hm);
                     startActivity(myIntent);
                 } catch (Exception e){
                     e.printStackTrace();

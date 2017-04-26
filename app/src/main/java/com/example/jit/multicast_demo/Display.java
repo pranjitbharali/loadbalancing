@@ -44,9 +44,19 @@ public class Display extends AppCompatActivity {
         //check = new HashMap<>();
         String arr = getIntent().getStringExtra("arr");
         final String headip = getIntent().getStringExtra("ip");
+        HashMap<String,File> myFiles = (HashMap<String, File>)getIntent().getSerializableExtra("hm");
+
         ListSend ls =new ListSend().fromJson(arr);
 
-        final ArrayList<Pair> popu=ls.arr;
+        ArrayList<Pair> temp1 = ls.arr;
+        ArrayList<Pair> temp2 = new ArrayList<>();
+        for(Pair p : temp1) {
+            if(myFiles.containsKey(p.a))
+                continue;
+            temp2.add(p);
+        }
+
+        final ArrayList<Pair> popu= temp2;
         ArrayList<String> popu1 = new ArrayList<>();
 
         // shouldn't show his own files
