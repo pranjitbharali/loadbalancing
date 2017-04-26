@@ -185,8 +185,8 @@ public class MainActivity extends AppCompatActivity {
 
                         try{
                             String line = in.readLine();
-                            //Send data back to client
-                            if(line.charAt(0)=='i'){
+
+                            if(line.charAt(0)=='i'){        //client has sent his file information, update hashmaps
 
                                 FileManager fm1 = fm.fromJson(line.substring(1));
 
@@ -205,18 +205,17 @@ public class MainActivity extends AppCompatActivity {
                                     hm1.put(key,value);
                                 }
 
-                            }else if(line.charAt(0)=='r'){
+                            }else if(line.charAt(0)=='r'){      //request button pressed by a client
                                 ListSend ls=new ListSend();
                                 ls.func(hm);
                                 String sendthis=ls.toJson();
                                 out.write(sendthis+"\n");
                                 out.flush();
-                            } else if(line.charAt(0)=='d'){
+                            } else if(line.charAt(0)=='d'){           //client has requested for a file, send information about peers having that file
 
                                 final String md5=line.substring(1);
 
-
-                                ArrayList<String> ips=new ArrayList<String>();
+                                ArrayList<String> ips=new ArrayList<>();
                                 ArrayList<Pair> value = hm.get(md5);
                                 for(final Pair p:value) {
                                     ips.add(p.a);
@@ -322,6 +321,7 @@ public class MainActivity extends AppCompatActivity {
                                 peers.clear();
                                 peers.add(msg.substring(1));
                                 hm.clear();
+                                hm1.clear();
 
                                 final Peer print_peer = new Peer().fromJson(msg.substring(1));
                                 runOnUiThread(new Runnable() {
@@ -573,7 +573,7 @@ public class MainActivity extends AppCompatActivity {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        send("e"+mePeer);
+                        send("e"+mePeer);   //request to start election
 
                     }
                 }).start();
