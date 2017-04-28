@@ -1,15 +1,20 @@
 package com.example.jit.multicast_demo;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Environment;
 import android.support.annotation.BoolRes;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.SurfaceHolder;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -40,6 +45,10 @@ public class Display extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display);
+        getSupportActionBar().setTitle("Files");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
         lv1=(ListView) findViewById(R.id.lv);
         //check = new HashMap<>();
         String arr = getIntent().getStringExtra("arr");
@@ -71,7 +80,7 @@ public class Display extends AppCompatActivity {
 
 // Bind onclick event handler
         lv1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View view,
+            public void onItemClick(final AdapterView<?> parent, View view,
                                     final int position, long id) {
 
                 //check = new HashMap<>();
@@ -116,7 +125,7 @@ public class Display extends AppCompatActivity {
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Toast.makeText(Display.this,"Size hai "+sze+noofseeders, Toast.LENGTH_SHORT).show();
+                            //        Toast.makeText(Display.this,"Size hai "+sze+noofseeders, Toast.LENGTH_SHORT).show();
                                 }
                             });
 
@@ -197,6 +206,14 @@ public class Display extends AppCompatActivity {
 
                                             semarr[cnt].release();
 
+                                            runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    Toast.makeText(Display.this,"part "+cnt+" received", Toast.LENGTH_LONG).show();
+                                                }
+                                            });
+
+
                                         } catch(Exception e){
                                             e.printStackTrace();
                                         }
@@ -233,5 +250,11 @@ public class Display extends AppCompatActivity {
 
             }
         });
+    }
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        finish();
+        return true;
     }
 }

@@ -64,8 +64,6 @@ import static java.util.UUID.randomUUID;
 
 public class MainActivity extends AppCompatActivity {
 
-
-
     byte[] outBuf,inbuf;
     HashMap<String,ArrayList<Pair>> hm;
     // md5sum and Duration
@@ -92,11 +90,27 @@ public class MainActivity extends AppCompatActivity {
     public static final int buffSize = 10000000;      //10 MB
     public static final int sockTimeOut = 600000; //10 mins
 
+    TextView subscribe;
+    ImageView request;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         pr("ON");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        tv1= (TextView) findViewById(R.id.tv);
+        subscribe = (TextView) findViewById(R.id.Subscribe);
+        request = (ImageView) findViewById(R.id.displayb);
+        request.setVisibility(View.INVISIBLE);
+        tv1.setVisibility(View.INVISIBLE);
+
+        subscribe.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                f2(view);
+            }
+        });
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions( this,new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},1);
@@ -111,7 +125,6 @@ public class MainActivity extends AppCompatActivity {
         fm= new FileManager(getIP());
         fm.getmd5sum(getApplicationContext());
 
-        tv1= (TextView) findViewById(R.id.tv);
         hm = new HashMap<String,ArrayList<Pair>>();
         hm1= new HashMap<>();
         tv1.setMovementMethod(new ScrollingMovementMethod());
@@ -129,7 +142,6 @@ public class MainActivity extends AppCompatActivity {
         try{
             address = InetAddress.getByName(MULTI_IP);
             sock = new MulticastSocket(PORT);
-            Toast.makeText(MainActivity.this,"Welcome",Toast.LENGTH_SHORT).show();
         }
         catch(IOException e){
             e.printStackTrace();
@@ -370,7 +382,7 @@ public class MainActivity extends AppCompatActivity {
                                                     else {
                                                         yes_no = "NO";
                                                     }
-                                                    tv2.setText("Are you head ? : "+yes_no+" "+headip);
+                                                    tv2.setText("Are you head ? : "+yes_no+"\n"+"IP of head : "+headip);
                                                 }
                                             });
                                             {
@@ -567,6 +579,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void f2(View v){
+        subscribe.setVisibility(View.INVISIBLE);
+        request.setVisibility(View.VISIBLE);
+        tv1.setVisibility(View.VISIBLE);
         try{
             if(b) {
                 sock.joinGroup(address);
